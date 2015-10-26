@@ -12,7 +12,7 @@
         "indentSize": 2,
         "tabSize": 2
     },
-    "compileOnSave": true,
+    "compileOnSave": false,
     "filesGlob": [
         "src/**/*.ts",
         "typings/**/*.d.ts",
