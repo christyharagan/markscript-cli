@@ -81,4 +81,3 @@ taskPromise.catch(function (e) {
 }).then(function () {
     process.exit(0);
 });
-//# sourceMappingURL=markscript.js.map
