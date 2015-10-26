@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 var path = require('path');
 var fs = require('fs');
-var Build = require('../lib/build');
-var coreBuildPlugin_1 = require('../lib/coreBuildPlugin');
+var core = require('markscript-core');
 var p = require('typescript-package');
 var Yargs = require('yargs');
 var ts = require('typescript');
@@ -28,9 +27,9 @@ var build;
 if (markscriptFile) {
     if (isTypeScript) {
         var options = {
-            module: ts.ModuleKind.CommonJS,
-            target: ts.ScriptTarget.ES5,
-            moduleResolution: ts.ModuleResolutionKind.Classic
+            module: 1 /* CommonJS */,
+            target: 1 /* ES5 */,
+            moduleResolution: 1 /* Classic */
         };
         function req(module, filename) {
             module._compile(ts.transpile(fs.readFileSync(filename).toString(), options), filename);
@@ -42,13 +41,13 @@ if (markscriptFile) {
         console.error('markscriptfile should export a const value called "build" of type MarkScript.Build');
         process.exit(1);
     }
-    var plugins = [coreBuildPlugin_1.coreBuildPlugin];
+    var plugins = [core.coreBuildPlugin];
     if (buildFile.plugins) {
         plugins = plugins.concat(buildFile.plugins);
     }
     var pkgDir = buildFile.pkgDir || cwd;
     process.chdir(pkgDir);
-    build = new Build.Build({
+    build = new core.Build({
         buildConfig: buildFile.buildConfig,
         plugins: plugins,
         pkgDir: pkgDir,
@@ -56,7 +55,7 @@ if (markscriptFile) {
         isTypeScript: isTypeScript,
         runtime: buildFile.runtime,
         tasks: buildFile.tasks,
-        buildModelPersistance: Build.BuildModelPersistance.NO_SOURCE
+        buildModelPersistance: 1 /* NO_SOURCE */
     });
     Object.keys(build.tasks).forEach(function (taskName) {
         yargs.command(taskName, build.tasks[taskName].description);

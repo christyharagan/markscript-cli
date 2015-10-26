@@ -2,10 +2,9 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
-        "declaration": true,
+        "declaration": false,
         "rootDir": "./src",
-        "sourceMap": true,
-        "sourceRoot": ".",
+        "sourceMap": false,
         "outDir": ".",
         "moduleResolution": "node"
     },
@@ -16,13 +15,18 @@
     "compileOnSave": true,
     "filesGlob": [
         "src/**/*.ts",
-        "typings/**/*.d.ts"
+        "typings/**/*.d.ts",
+        "node_modules/markscript-core/build.d.ts",
+        "node_modules/marklogic-node-typescript-definitions/ts/index.d.ts"
     ],
     "files": [
         "src/bin/markscript.ts",
         "typings/node/node.d.ts",
+        "typings/promise/promise.d.ts",
         "typings/tsd.d.ts",
-        "typings/yargs/yargs.d.ts"
+        "typings/yargs/yargs.d.ts",
+        "node_modules/markscript-core/build.d.ts",
+        "node_modules/marklogic-node-typescript-definitions/ts/index.d.ts"
     ],
     "exclude": []
 }

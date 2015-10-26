@@ -2,8 +2,7 @@
 
 import * as path from 'path'
 import * as fs from 'fs'
-import * as Build from '../lib/build'
-import {coreBuildPlugin} from '../lib/coreBuildPlugin'
+import * as core from 'markscript-core'
 import * as p from 'typescript-package'
 import * as Yargs from 'yargs'
 import * as os from 'os'
@@ -28,7 +27,7 @@ let yargs = Yargs
   .help('help')
   .version(p.getPackageJson(cwd).version)
 
-let build: Build.Build
+let build: core.Build
 
 if (markscriptFile) {
   if (isTypeScript) {
@@ -50,7 +49,7 @@ if (markscriptFile) {
     process.exit(1)
   }
 
-  let plugins: Build.BuildModelPlugin<any, any>[] = [coreBuildPlugin]
+  let plugins: core.BuildModelPlugin<any, any>[] = [core.coreBuildPlugin]
   if (buildFile.plugins) {
     plugins = plugins.concat(buildFile.plugins)
   }
@@ -58,7 +57,7 @@ if (markscriptFile) {
 
   process.chdir(pkgDir)
 
-  build = new Build.Build({
+  build = new core.Build({
     buildConfig: buildFile.buildConfig,
     plugins: plugins,
     pkgDir: pkgDir,
@@ -66,7 +65,7 @@ if (markscriptFile) {
     isTypeScript: isTypeScript,
     runtime: buildFile.runtime,
     tasks: buildFile.tasks,
-    buildModelPersistance: Build.BuildModelPersistance.NO_SOURCE
+    buildModelPersistance: core.BuildModelPersistance.NO_SOURCE
   })
 
   Object.keys(build.tasks).forEach(function(taskName) {
