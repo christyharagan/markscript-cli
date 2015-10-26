@@ -22,7 +22,6 @@ var yargs = Yargs
     .demand(1)
     .command('init', 'Initialise a new MarkScript project')
     .help('help')
-    .version(p.getPackageJson(cwd).version);
 var build;
 if (markscriptFile) {
     if (isTypeScript) {

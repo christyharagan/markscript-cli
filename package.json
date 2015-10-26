@@ -1,6 +1,6 @@
 {
   "name": "markscript-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Command line interface for creating and managing MarkScript projects.",
   "repository": "christyharagan/markscript-cli",
   "author": {
