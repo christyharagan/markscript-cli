@@ -4,6 +4,7 @@ var fs = require('fs');
 var core = require('markscript-core');
 var p = require('typescript-package');
 var Yargs = require('yargs');
+var os = require('os');
 var ts = require('typescript');
 var markscript_init_1 = require('markscript-init');
 var cwd = process.cwd();
@@ -21,17 +22,47 @@ var yargs = Yargs
     .usage('Build your MarkScript project.\nUsage: markscript <task>')
     .demand(1)
     .command('init', 'Initialise a new MarkScript project')
-    .help('help')
+    .help('help');
 var build;
 if (markscriptFile) {
     if (isTypeScript) {
+        var outDir = path.join(os.tmpdir(), 'markscript-cli', p.getPackageJson(process.cwd()).name);
         var options = {
             module: 1 /* CommonJS */,
             target: 1 /* ES5 */,
-            moduleResolution: 1 /* Classic */
+            moduleResolution: 1 /* Classic */,
+            rootDir: process.cwd(),
+            outDir: outDir
         };
-        function req(module, filename) {
-            module._compile(ts.transpile(fs.readFileSync(filename).toString(), options), filename);
+        var relFiles = p.getTSConfig(process.cwd()).files;
+        var compile = false;
+        var files = relFiles.map(function (relFile) {
+            var tsFile = path.join(process.cwd(), relFile);
+            if (tsFile.substring(tsFile.length - 5) !== '.d.ts') {
+                var jsFile = path.join(outDir, relFile);
+                jsFile = jsFile.substring(0, jsFile.length - 3) + '.js';
+                if (!fs.existsSync(jsFile) || fs.statSync(tsFile).mtime >= fs.statSync(jsFile).mtime) {
+                    compile = true;
+                }
+            }
+            return tsFile;
+        });
+        if (compile) {
+            var program = ts.createProgram(files, options);
+            program.getSourceFiles().forEach(function (sf) {
+                var emitResults = program.emit(sf);
+                if (emitResults.diagnostics.length > 0) {
+                    emitResults.diagnostics.forEach(function (error) {
+                        console.error(error);
+                    });
+                    process.exit(1);
+                }
+            });
+        }
+        function req(module, fileName) {
+            var jsPath = path.join(outDir, path.relative(process.cwd(), fileName));
+            jsPath = jsPath.substring(0, jsPath.length - 3) + '.js';
+            module._compile(fs.readFileSync(jsPath).toString());
         }
         require.extensions['.ts'] = req;
     }

@@ -30,14 +30,47 @@ let build: core.Build
 
 if (markscriptFile) {
   if (isTypeScript) {
+    let outDir = path.join(os.tmpdir(), 'markscript-cli', p.getPackageJson(process.cwd()).name)
     let options: ts.CompilerOptions = {
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES5,
-      moduleResolution: ts.ModuleResolutionKind.Classic
+      moduleResolution: ts.ModuleResolutionKind.Classic,
+      rootDir: process.cwd(),
+      outDir: outDir
+    }
+    
+    let relFiles = p.getTSConfig(process.cwd()).files
+    let compile = false
+    let files = relFiles.map(function(relFile){
+      let tsFile = path.join(process.cwd(), relFile)
+      if (tsFile.substring(tsFile.length - 5) !== '.d.ts') {
+        let jsFile = path.join(outDir, relFile)
+        jsFile = jsFile.substring(0, jsFile.length - 3) + '.js'
+        if (!fs.existsSync(jsFile) || fs.statSync(tsFile).mtime >= fs.statSync(jsFile).mtime) {
+          compile = true
+        }
+      }
+      
+      return tsFile
+    })
+    
+    if (compile) {
+      let program = ts.createProgram(files, options)
+      program.getSourceFiles().forEach(function(sf){
+        let emitResults = program.emit(sf)
+        if (emitResults.diagnostics.length > 0) {
+          emitResults.diagnostics.forEach(function(error){
+            console.error(error)            
+          })
+          process.exit(1)
+        }
+      })
     }
 
-    function req(module, filename) {
-      module._compile(ts.transpile(fs.readFileSync(filename).toString(), options), filename)
+    function req(module, fileName:string) {
+      let jsPath = path.join(outDir, path.relative(process.cwd(), fileName))
+      jsPath = jsPath.substring(0, jsPath.length - 3) + '.js'
+      module._compile(fs.readFileSync(jsPath).toString())
     }
     require.extensions['.ts'] = req
   }
